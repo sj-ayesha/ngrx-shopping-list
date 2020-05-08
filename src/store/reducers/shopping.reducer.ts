@@ -1,24 +1,78 @@
 import { ShoppingItem } from '../models/shopping-item.models';
 import { ShoppingAction, ShoppingActionTypes } from '../actions/shopping.actions';
 
-const initialState: Array<ShoppingItem> = [
-  {
-    id: '1775935f-36fd-467e-a667-09f95b917f6d',
-    name: 'Diet Coke',
-  },
-  {
-    id: '1775935f-36fd-467e-a667-19f95b917f6d',
-    name: 'Fanta',
-  }
-];
+export interface ShoppingState {
+  list: ShoppingItem[];
+  loading: boolean;
+  error: Error;
+}
 
-export function ShoppingReducer(state: Array<ShoppingItem> = initialState, action: ShoppingAction) {
+const initialState: ShoppingState = {
+  list: [],
+  loading: false,
+  error: undefined
+}
+
+export function ShoppingReducer(state: ShoppingState = initialState, action: ShoppingAction) {
   switch (action.type) {
+    // Load Actions
+    case ShoppingActionTypes.LOAD_SHOPPING:
+      return {
+        ...state,
+        loading: true
+      };
+    case ShoppingActionTypes.LOAD_SHOPPING_SUCCESS:
+      return {
+        ...state,
+        list: action.payload,
+        loading: false
+      };
+    case ShoppingActionTypes.LOAD_SHOPPING_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+        loading: false
+      };
+
+    // Add Item Actions
     case ShoppingActionTypes.ADD_ITEM:
-      return [...state, action.payload];
+      return {
+        ...state,
+        loading: true
+      };
+    case ShoppingActionTypes.ADD_ITEM_SUCCESS:
+      return {
+        ...state,
+        list: [...state.list, action.payload],
+        loading: false
+      };
+    case ShoppingActionTypes.ADD_ITEM_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+        loading: false
+      };
+
+    // Delete Item Action
     case ShoppingActionTypes.DELETE_ITEM:
-      // filter state to check if item id matches the id of action payload
-      return state.filter(item => item.id !== action.payload);
+      return {
+        ...state,
+        loading: true
+      };
+    case ShoppingActionTypes.DELETE_ITEM_SUCCESS:
+      return {
+        ...state,
+        list: state.list.filter(item => item.id !== action.payload),
+        loading: false
+      }
+    case ShoppingActionTypes.DELETE_ITEM_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+        loading: false
+      };
+
+    // Default
     default:
       return state;
   }
